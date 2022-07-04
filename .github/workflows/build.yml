@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v1
         with:
-          name: VaillantMqttClient
+          name: VaillantMqttClient-Jar
           path: target/
       - name: Docker build
         run: |
