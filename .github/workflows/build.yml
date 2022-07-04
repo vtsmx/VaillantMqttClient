@@ -28,7 +28,7 @@ jobs:
       - run: mv target/*.jar target/VaillantMqttClient.jar
       - uses: actions/upload-artifact@v3
         with:
-          name: VaillantMqttClient
+          name: VaillantMqttClient-Jar
           path: staging
 
   deploy:
@@ -49,5 +49,5 @@ jobs:
       - run: mkdir staging && cp target/*.tar staging
       - uses: actions/upload-artifact@v3
         with:
-          name: VaillantMqttClient
+          name: VaillantMqttClient-Docker
           path: staging
