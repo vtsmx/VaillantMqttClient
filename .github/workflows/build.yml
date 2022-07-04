@@ -25,10 +25,10 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - run: mkdir staging && cp target/*.jar staging
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
-          name: Package
-          path: staging
+          name: VaillantMqttClient.jar
+          path: staging/*.jar
 
   deploy:
 
@@ -46,7 +46,7 @@ jobs:
           docker build . -t vaillant_mqtt_client
       - run: docker save -o target/VaillantMqttClient.tar vaillant_mqtt_client:latest
       - run: mkdir staging && cp target/*.tar staging
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: VaillantMqttClient
           path: staging
