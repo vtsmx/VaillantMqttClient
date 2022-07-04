@@ -1,3 +1,5 @@
+package org.vmqtt;
+
 import java.time.LocalDateTime;
 
 public class Temperature

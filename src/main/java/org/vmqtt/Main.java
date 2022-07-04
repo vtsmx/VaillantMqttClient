@@ -1,8 +1,11 @@
+package org.vmqtt;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import org.apache.commons.cli.*;
 import org.eclipse.paho.client.mqttv3.*;
+import org.vmqtt.Temperature;
 
 import java.io.IOException;
 import java.net.CookieManager;
@@ -32,8 +35,6 @@ public class Main
 
     public static void main(String[] args)
     {
-
-
         Options options = new Options();
 
         Option serialNumberOpt = new Option("serialNumber", true, "Serial number of the vaillant heating/cooling device");
