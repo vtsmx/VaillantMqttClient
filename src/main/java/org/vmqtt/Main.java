@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import org.apache.commons.cli.*;
 import org.eclipse.paho.client.mqttv3.*;
-import org.vmqtt.Temperature;
+import org.vmqtt.Measurement;
 
 import java.io.IOException;
 import java.net.CookieManager;
@@ -197,7 +197,7 @@ public class Main
         return (response.statusCode()==200);
     }
 
-    public static Temperature getOutsideTemp() throws IOException, InterruptedException
+    public static String getOutsideTempJson() throws IOException, InterruptedException
     {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://smart.vaillant.com/mobile/api/v4/facilities/"+serialNumber+"/systemcontrol/v1/status"))
@@ -212,13 +212,137 @@ public class Main
 
         var map = gson.fromJson(response.body(), JsonObject.class);
 
-        float outTemp = map.get("body").getAsJsonObject().get("outside_temperature").getAsFloat();
-        String datetime = map.get("body").getAsJsonObject().get("datetime").getAsString();
+        return map.get("body").getAsJsonObject().toString();
+    }
+
+    public static String getSystemStatusJson() throws IOException, InterruptedException
+    {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://smart.vaillant.com/mobile/api/v4/facilities/"+serialNumber+"/system/v1/status"))
+                .header("User-Agent", "okhttp/3.10.0")
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .GET()
+                .build();
 
 
-        Temperature temperature = new Temperature("outside_temperature", outTemp, datetime, "°C");
 
-        return temperature;
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        Gson gson = new Gson();
+
+        var map = gson.fromJson(response.body(), JsonObject.class);
+
+        return map.get("body").getAsJsonObject().toString();
+    }
+
+    public static String getSystemDetailsJson() throws IOException, InterruptedException
+    {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://smart.vaillant.com/mobile/api/v4/facilities/"+serialNumber+"/system/v1/details"))
+                .header("User-Agent", "okhttp/3.10.0")
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .GET()
+                .build();
+
+
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        Gson gson = new Gson();
+
+        var map = gson.fromJson(response.body(), JsonObject.class);
+
+        return map.get("body").getAsJsonObject().toString();
+    }
+
+    public static String getDhwJson() throws IOException, InterruptedException
+    {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://smart.vaillant.com/mobile/api/v4/facilities/"+serialNumber+"/systemcontrol/v1/dhw"))
+                .header("User-Agent", "okhttp/3.10.0")
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .GET()
+                .build();
+
+
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        Gson gson = new Gson();
+
+        var map = gson.fromJson(response.body(), JsonObject.class);
+
+        return map.get("body").getAsJsonArray().get(0).getAsJsonObject().toString();
+    }
+
+    public static String getEmfJson() throws IOException, InterruptedException
+    {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://smart.vaillant.com/mobile/api/v4/facilities/"+serialNumber+"/emf/v1/devices"))
+                .header("User-Agent", "okhttp/3.10.0")
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .GET()
+                .build();
+
+
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        Gson gson = new Gson();
+
+        var map = gson.fromJson(response.body(), JsonObject.class);
+
+        return map.get("body").getAsJsonArray().get(0).getAsJsonObject().toString();
+    }
+
+    public static String getZoneStateJson() throws IOException, InterruptedException
+    {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://smart.vaillant.com/mobile/api/v4/facilities/"+serialNumber+"/systemcontrol/v1/zones"))
+                .header("User-Agent", "okhttp/3.10.0")
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .GET()
+                .build();
+
+
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        Gson gson = new Gson();
+
+        var map = gson.fromJson(response.body(), JsonObject.class);
+
+        return map.get("body").getAsJsonArray().get(0).getAsJsonObject().toString();
+    }
+
+    public static String getLiveReportJson() throws IOException, InterruptedException
+    {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://smart.vaillant.com/mobile/api/v4/facilities/"+serialNumber+"/livereport/v1"))
+                .header("User-Agent", "okhttp/3.10.0")
+                .header("Content-Type", "application/json; charset=UTF-8")
+                .GET()
+                .build();
+
+
+
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        Gson gson = new Gson();
+
+        var map = gson.fromJson(response.body(), JsonObject.class);
+
+        JsonObject reports = new JsonObject();
+
+        for ( var x : map.get("body").getAsJsonObject().get("devices").getAsJsonArray() )
+        {
+            var rep = x.getAsJsonObject().get("reports").getAsJsonArray().get(0);
+
+            reports.add(rep.getAsJsonObject().get("_id").toString().replace("\"", ""), rep);
+        }
+            //System.out.println(x);
+
+        return reports.toString();
     }
 
     public static void worker() throws IOException, InterruptedException, MqttException
@@ -231,8 +355,6 @@ public class Main
 
         Gson gson = new Gson();
 
-        System.out.println(gson.toJson(getOutsideTemp()));
-
         String publisherId = UUID.randomUUID().toString();
         IMqttClient publisher = new MqttClient("tcp://"+mqttBrokerHost+":"+mqttBrokerPort+"", publisherId);
 
@@ -243,15 +365,24 @@ public class Main
         publisher.connect(options);
 
         //mqtt publish
-        byte[] bytes = new byte[1];
-        bytes[0] = 1;
-        MqttMessage payload = new MqttMessage(gson.toJson(getOutsideTemp()).getBytes());
-        payload.setQos(0);
-        payload.setRetained(true);
-        publisher.publish("/vaillant/outsideTemp",payload);
+        publishMessage("/vaillant/outsideTemp", getOutsideTempJson(), publisher);
+        publishMessage("/vaillant/systemState", getSystemStatusJson(), publisher);
+        publishMessage("/vaillant/systemDetails", getSystemDetailsJson(), publisher);
+        publishMessage("/vaillant/dhwState", getDhwJson(), publisher);
+        publishMessage("/vaillant/emfState", getEmfJson(), publisher);
+        publishMessage("/vaillant/zoneState", getZoneStateJson(), publisher);
+        publishMessage("/vaillant/liveReport", getLiveReportJson(), publisher);
 
         publisher.disconnect();
 
         logout();
+    }
+
+    public static void publishMessage(String topic, String payloadStr, IMqttClient publisher) throws MqttException
+    {
+        MqttMessage payload = new MqttMessage(payloadStr.getBytes());
+        payload.setQos(0);
+        payload.setRetained(true);
+        publisher.publish(topic ,payload);
     }
 }
