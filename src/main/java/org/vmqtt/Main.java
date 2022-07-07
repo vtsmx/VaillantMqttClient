@@ -66,7 +66,10 @@ public class Main
 
         String userDir = System.getProperty("user.dir");
         Path path = Paths.get(userDir);
-        String project = path.getFileName().toString();
+        String project = "programm";
+
+        if ( path.getFileName() != null )
+            project = path.getFileName().toString();
 
         try {
             cmd = parser.parse(options, args);
