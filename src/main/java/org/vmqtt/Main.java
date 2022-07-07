@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import org.apache.commons.cli.*;
 import org.eclipse.paho.client.mqttv3.*;
-import org.vmqtt.Measurement;
 
 import java.io.IOException;
 import java.net.CookieManager;
@@ -14,6 +13,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 public class Main
