@@ -63,11 +63,15 @@ public class Main
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd = null;//not a good practice, it serves it purpose
 
+        String userDir = System.getProperty("user.dir");
+        Path path = Paths.get(userDir);
+        String project = path.getFileName().toString();
+
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            formatter.printHelp("programm [options]", options);
+            formatter.printHelp(project+" [options]", options);
 
             System.exit(1);
         }
@@ -87,6 +91,7 @@ public class Main
 
         client = HttpClient.newBuilder()
                 .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL))
+                .followRedirects(HttpClient.Redirect.ALWAYS)
                 .build();
 
         clientId = getClientId();
