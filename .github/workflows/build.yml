@@ -44,7 +44,7 @@ jobs:
           path: target/
       - name: Docker build
         run: |
-          docker build . -t vaillant_mqtt_client --platform linux/amd64,linux/arm64,linux/arm/v7
+          docker build . --platform "linux/amd64,linux/arm64,linux/arm/v7" -t vaillant_mqtt_client
       - run: docker save -o target/VaillantMqttClient.tar vaillant_mqtt_client:latest
       - run: mkdir staging && cp target/*.tar staging
       - uses: actions/upload-artifact@v3
