@@ -293,8 +293,6 @@ public class Main
                 .GET()
                 .build();
 
-
-
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         Gson gson = new Gson();
@@ -374,13 +372,12 @@ public class Main
         publisher.connect(options);
 
         //mqtt publish
-        publishMessage("/vaillant/outsideTemp", getOutsideTempJson(), publisher);
-        publishMessage("/vaillant/systemState", getSystemStatusJson(), publisher);
-        publishMessage("/vaillant/systemDetails", getSystemDetailsJson(), publisher);
-        publishMessage("/vaillant/dhwState", getDhwJson(), publisher);
-        publishMessage("/vaillant/emfState", getEmfJson(), publisher);
-        publishMessage("/vaillant/zoneState", getZoneStateJson(), publisher);
-        publishMessage("/vaillant/liveReport", getLiveReportJson(), publisher);
+        try {String json = getSystemStatusJson(); publishMessage("vaillant/systemState", json, publisher);} catch (Exception e) { e.printStackTrace(); };
+        try {String json = getSystemDetailsJson(); publishMessage("vaillant/systemDetails", json, publisher);} catch (Exception e) { e.printStackTrace(); };
+        try {String json = getDhwJson(); publishMessage("vaillant/dhwState", json, publisher);} catch (Exception e) { e.printStackTrace(); };
+        try {String json = getEmfJson(); publishMessage("vaillant/emfState", json, publisher);} catch (Exception e) { e.printStackTrace(); };
+        try {String json = getZoneStateJson(); publishMessage("vaillant/zoneState", json, publisher);} catch (Exception e) { e.printStackTrace(); };
+        try {String json = getLiveReportJson(); publishMessage("vaillant/liveReport", json, publisher);} catch (Exception e) { e.printStackTrace(); };
 
         publisher.disconnect();
 
