@@ -384,7 +384,7 @@ public class Main
         logout();
     }
 
-    public static void publishMessage(String topic, String payloadStr, IMqttClient publisher) throws MqttException
+    public static void publishMessage(String topic, String payloadStr, IMqttClient publisher) throws Exception
     {
         MqttMessage payload = new MqttMessage(payloadStr.getBytes("UTF-8"));
         payload.setQos(0);
