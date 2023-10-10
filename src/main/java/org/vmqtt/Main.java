@@ -386,7 +386,7 @@ public class Main
 
     public static void publishMessage(String topic, String payloadStr, IMqttClient publisher) throws MqttException
     {
-        MqttMessage payload = new MqttMessage(payloadStr.getBytes());
+        MqttMessage payload = new MqttMessage(payloadStr.getBytes("UTF8"));
         payload.setQos(0);
         payload.setRetained(true);
         publisher.publish(topic ,payload);
